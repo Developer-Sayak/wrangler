@@ -64,8 +64,10 @@ directive
     | stringList
     | numberRanges
     | properties
+    | byteSizeArg           // optional for specific arg rules
+    | timeDurationArg       // optional for specific arg rules
   )*?
-  ;
+ ;
 
 ifStatement
   : ifStat elseIfStat* elseStat? '}'
@@ -140,7 +142,12 @@ numberRange
  ;
 
 value
- : String | Number | Column | Bool
+ : String
+ | Number
+ | Column
+ | Bool
+ | BYTE_SIZE       // added
+ | TIME_DURATION   // added
  ;
 
 ecommand
@@ -195,6 +202,14 @@ identifierList
  : Identifier (',' Identifier)*
  ;
 
+// OPTIONAL: Specific argument rules if needed
+byteSizeArg
+ : BYTE_SIZE
+ ;
+
+timeDurationArg
+ : TIME_DURATION
+ ;
 
 /*
  * Following are the Lexer Rules used for tokenizing the recipe.
@@ -215,14 +230,14 @@ StartsWith : '=^';
 NotStartsWith : '!^';
 EndsWith : '=$';
 NotEndsWith : '!$';
-PlusEqual : '+=';
-SubEqual : '-=';
-MulEqual : '*=';
-DivEqual : '/=';
-PerEqual : '%=';
-AndEqual : '&=';
-OrEqual  : '|=';
-XOREqual : '^=';
+PlusEqual : '+=' ;
+SubEqual : '-=' ;
+MulEqual : '*=' ;
+DivEqual : '/=' ;
+PerEqual : '%=' ;
+AndEqual : '&=' ;
+OrEqual  : '|=' ;
+XOREqual : '^=' ;
 Pow      : '^';
 External : '!';
 GT       : '>';
@@ -247,7 +262,6 @@ BackSlash: '\\';
 Dollar   : '$';
 Tilde    : '~';
 
-
 Bool
  : 'true'
  | 'false'
@@ -270,8 +284,30 @@ Column
  ;
 
 String
- : '\'' ( EscapeSequence | ~('\'') )* '\''
- | '"'  ( EscapeSequence | ~('"') )* '"'
+ : '\'' ( EscapeSequence | ~('\'')) * '\''
+ | '"'  ( EscapeSequence | ~('"')) * '"'
+ ;
+
+BYTE_SIZE
+ : Int ('.' Digit*)? BYTE_UNIT
+ ;
+
+TIME_DURATION
+ : Int ('.' Digit*)? TIME_UNIT
+ ;
+
+fragment BYTE_UNIT
+ : [kK][bB]
+ | [mM][bB]
+ | [gG][bB]
+ | [tT][bB]
+ ;
+
+fragment TIME_UNIT
+ : [mM][sS]
+ | [sS]
+ | [mM][iI][nN]
+ | [hH]
  ;
 
 EscapeSequence
